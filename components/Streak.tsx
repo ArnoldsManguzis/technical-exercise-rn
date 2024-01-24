@@ -6,6 +6,8 @@ import Svg, { Path } from "react-native-svg";
 import Animated, { SlideInLeft } from "react-native-reanimated";
 import { MotiView } from "moti";
 
+const getOpacity = [0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1];
+
 const addDays = (date: string, days: number) => {
     var result = new Date(date);
     result.setDate(result.getDate() + days);
@@ -59,33 +61,28 @@ const Streak = ({ streak }: StreakProps) => {
                 setWeek(newWeek);
                 setIsPerfectWeek(false);
             }
-
-            // setWeek(newWeek);
+        } else {
+            const newWeek = Array(7)
+                .fill(0)
+                .map((day, index) => {
+                    return {
+                        date: dayjs(
+                            addDays(dayjs().toISOString(), index)
+                        ).toISOString(),
+                        workoutComplete: false,
+                        currentDay: false,
+                    };
+                });
+            newWeek[0].currentDay = true;
+            setWeek(newWeek);
+            setIsPerfectWeek(false);
         }
     }, [streak]);
 
     return (
         <View style={styles.container}>
-            {/* <View
-                style={{
-                    position: "absolute",
-                    width: "100%",
-                    height: 32,
-                    backgroundColor: "green",
-                    zIndex: -1,
-                    borderTopRightRadius: 32,
-                    borderBottomRightRadius: 32,
-                }}
-            /> */}
-            <View style={{ flexDirection: "column" }}>
-                <View
-                    style={{
-                        flexDirection: "row",
-                        gap: 16,
-                        justifyContent: "space-around",
-                        marginBottom: 8,
-                    }}
-                >
+            <View style={styles.innerContainer}>
+                <View style={styles.labelContainer}>
                     {week.length > 0 &&
                         week.map((day, index) => {
                             return (
@@ -98,13 +95,14 @@ const Streak = ({ streak }: StreakProps) => {
                                         duration: 350,
                                     }}
                                     key={day.date}
-                                    style={{
-                                        display: "flex",
-                                        gap: 8,
-                                        alignItems: "center",
-                                    }}
+                                    style={styles.dayContainer}
                                 >
-                                    <Text style={{ textAlign: "center" }}>
+                                    <Text
+                                        style={{
+                                            textAlign: "center",
+                                            color: "#F7F7F7",
+                                        }}
+                                    >
                                         {dayjs(day.date)
                                             .format("dd")
                                             .slice(0, 1)}
@@ -116,38 +114,31 @@ const Streak = ({ streak }: StreakProps) => {
                 <View>
                     <Animated.View entering={SlideInLeft.duration(2000)}>
                         <LinearGradient
-                            colors={["darkslateblue", "#F76938"]}
+                            colors={["#090D34", "#F76938"]}
                             start={[0, 1]}
                             end={[1, 0]}
-                            style={{
-                                width: "100%",
-                                height: 32,
-                                backgroundColor: "green",
-                                zIndex: -1,
-                                borderTopRightRadius: 32,
-                                borderBottomRightRadius: 32,
-                                position: "absolute",
-                            }}
+                            style={styles.slider}
                         ></LinearGradient>
                     </Animated.View>
-                    <View style={{ flexDirection: "row", gap: 16 }}>
+                    <View style={styles.iconContainer}>
                         {week.length > 0 &&
                             week.map((day, index) => {
                                 return (
                                     <MotiView
                                         from={{ scale: 3, opacity: 0 }}
-                                        animate={{ scale: 1, opacity: 1 }}
+                                        animate={{
+                                            scale: 1,
+                                            opacity: isPerfectWeek
+                                                ? getOpacity[index]
+                                                : 1,
+                                        }}
                                         delay={250 * (index + 1)}
                                         transition={{
                                             type: "timing",
                                             duration: 250,
                                         }}
                                         key={day.date + index}
-                                        style={{
-                                            display: "flex",
-                                            gap: 8,
-                                            alignItems: "center",
-                                        }}
+                                        style={styles.dayContainer}
                                     >
                                         <LinearGradient
                                             colors={
@@ -155,18 +146,14 @@ const Streak = ({ streak }: StreakProps) => {
                                                     ? ["#E32EED", "#F76938"]
                                                     : ["#F7F7F7"]
                                             }
-                                            style={{
-                                                height: 32,
-                                                width: 32,
-                                                borderRadius: 32,
-                                                borderWidth: day.currentDay
-                                                    ? 2
-                                                    : 0,
-                                                borderColor: "white",
-                                                backgroundColor: "red",
-                                                alignItems: "center",
-                                                justifyContent: "center",
-                                            }}
+                                            style={[
+                                                styles.icon,
+                                                {
+                                                    borderWidth: day.currentDay
+                                                        ? 2
+                                                        : 0,
+                                                },
+                                            ]}
                                         >
                                             {day.workoutComplete &&
                                                 !isPerfectWeek && (
@@ -209,7 +196,35 @@ const Streak = ({ streak }: StreakProps) => {
 export default Streak;
 
 const styles = StyleSheet.create({
-    container: {
-        // backgroundColor: "cornflowerblue",
+    container: {},
+    innerContainer: { flexDirection: "column" },
+    labelContainer: {
+        flexDirection: "row",
+        gap: 16,
+        justifyContent: "space-around",
+        marginBottom: 8,
+    },
+    iconContainer: { flexDirection: "row", gap: 16 },
+    icon: {
+        height: 32,
+        width: 32,
+        borderRadius: 32,
+        borderColor: "#F7F7F7",
+        backgroundColor: "red",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    dayContainer: {
+        display: "flex",
+        gap: 8,
+        alignItems: "center",
+    },
+    slider: {
+        width: "100%",
+        height: 32,
+        zIndex: -1,
+        borderTopRightRadius: 32,
+        borderBottomRightRadius: 32,
+        position: "absolute",
     },
 });
