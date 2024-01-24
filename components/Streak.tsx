@@ -1,8 +1,10 @@
-import { Dimensions, StyleSheet, Text, View } from "react-native";
-import dayjs, { Dayjs } from "dayjs";
+import { StyleSheet, Text, View } from "react-native";
+import dayjs from "dayjs";
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useState } from "react";
 import Svg, { Path } from "react-native-svg";
+import Animated, { SlideInLeft } from "react-native-reanimated";
+import { MotiView } from "moti";
 
 const addDays = (date: string, days: number) => {
     var result = new Date(date);
@@ -85,15 +87,21 @@ const Streak = ({ streak }: StreakProps) => {
                     }}
                 >
                     {week.length > 0 &&
-                        week.map((day) => {
+                        week.map((day, index) => {
                             return (
-                                <View
+                                <MotiView
+                                    from={{ scale: 3, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    delay={250 * (index + 1)}
+                                    transition={{
+                                        type: "timing",
+                                        duration: 350,
+                                    }}
                                     key={day.date}
                                     style={{
                                         display: "flex",
                                         gap: 8,
-                                        width: 32,
-                                        // alignItems: "center",
+                                        alignItems: "center",
                                     }}
                                 >
                                     <Text style={{ textAlign: "center" }}>
@@ -101,28 +109,40 @@ const Streak = ({ streak }: StreakProps) => {
                                             .format("dd")
                                             .slice(0, 1)}
                                     </Text>
-                                </View>
+                                </MotiView>
                             );
                         })}
                 </View>
                 <View>
-                    <View
-                        style={{
-                            width: "100%",
-                            height: 32,
-                            backgroundColor: "green",
-                            zIndex: -1,
-                            borderTopRightRadius: 32,
-                            borderBottomRightRadius: 32,
-                            position: "absolute",
-                        }}
-                    />
+                    <Animated.View entering={SlideInLeft.duration(2000)}>
+                        <LinearGradient
+                            colors={["darkslateblue", "#F76938"]}
+                            start={[0, 1]}
+                            end={[1, 0]}
+                            style={{
+                                width: "100%",
+                                height: 32,
+                                backgroundColor: "green",
+                                zIndex: -1,
+                                borderTopRightRadius: 32,
+                                borderBottomRightRadius: 32,
+                                position: "absolute",
+                            }}
+                        ></LinearGradient>
+                    </Animated.View>
                     <View style={{ flexDirection: "row", gap: 16 }}>
                         {week.length > 0 &&
-                            week.map((day) => {
+                            week.map((day, index) => {
                                 return (
-                                    <View
-                                        key={day.date}
+                                    <MotiView
+                                        from={{ scale: 3, opacity: 0 }}
+                                        animate={{ scale: 1, opacity: 1 }}
+                                        delay={250 * (index + 1)}
+                                        transition={{
+                                            type: "timing",
+                                            duration: 250,
+                                        }}
+                                        key={day.date + index}
                                         style={{
                                             display: "flex",
                                             gap: 8,
@@ -176,7 +196,7 @@ const Streak = ({ streak }: StreakProps) => {
                                                 </Svg>
                                             )}
                                         </LinearGradient>
-                                    </View>
+                                    </MotiView>
                                 );
                             })}
                     </View>
@@ -190,6 +210,6 @@ export default Streak;
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: "cornflowerblue",
+        // backgroundColor: "cornflowerblue",
     },
 });
